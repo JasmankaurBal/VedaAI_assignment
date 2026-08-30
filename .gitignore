@@ -1,0 +1,33 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Environment variables
+.env
+.env.*
+
+# Node
+node_modules/
+.next/
+out/
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python cache
+.pytest_cache/
+
+# Uploads / generated files
+uploads/
+
+# Environment variables
+.env
+.env.*
+**/.env
+**/.env.*
