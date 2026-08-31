@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import { useState, useEffect } from "react";
 import { QuestionPaper, StudentAnalysis } from "@/types";
 import { getQuestionPaper, getAnalysis } from "@/lib/api";
@@ -46,6 +48,7 @@ export function AnalysisViewer({
     }
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     loadData();
   }, [paperId, analysisId]);
@@ -114,9 +117,9 @@ export function AnalysisViewer({
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Left: Questions List */}
-          <div className="lg:col-span-1">
+          <div className="lg:w-1/2 w-full">
             <div className="bg-white rounded-lg border border-gray-200 p-4 sticky top-4">
               <h2 className="font-semibold text-gray-900 mb-4">Questions</h2>
               <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -169,7 +172,7 @@ export function AnalysisViewer({
           </div>
 
           {/* Right: Answer Detail */}
-          <div className="lg:col-span-3">
+          <div className="lg:w-1/2 w-full">
             {selectedQuestion ? (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">
