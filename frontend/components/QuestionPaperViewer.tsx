@@ -2,7 +2,7 @@
 
 import { DocumentViewer, type DocumentRegion } from "./DocumentViewer";
 
-interface AnswerSheetViewerProps {
+interface QuestionPaperViewerProps {
   fileUrl: string;
   fileName: string;
   selectedQuestionNumber: string;
@@ -11,14 +11,14 @@ interface AnswerSheetViewerProps {
   onPageChange?: (page: number) => void;
 }
 
-export function AnswerSheetViewer({
+export function QuestionPaperViewer({
   fileUrl,
   fileName,
   selectedQuestionNumber,
   regions,
   activePage = 1,
   onPageChange,
-}: AnswerSheetViewerProps) {
+}: QuestionPaperViewerProps) {
   return (
     <DocumentViewer
       fileUrl={fileUrl}
@@ -26,7 +26,7 @@ export function AnswerSheetViewer({
       activePage={activePage}
       regions={regions}
       selectedLabel={selectedQuestionNumber}
-      highlightColor="green"
+      highlightColor="orange"
       onPageChange={onPageChange}
     />
   );

@@ -44,11 +44,17 @@ async def map_answers(
                 break
         
         if best_match:
+            answer_region = best_match.regions[0] if best_match.regions else None
             mapping = QuestionAnswerMapping(
                 question_id=question.id,
                 answer_id=best_match.id,
                 confidence=best_confidence,
-                match_type="direct"
+                match_type="direct",
+                question_region=question.region,
+                answer_region=answer_region,
+                score=2,
+                max_score=2,
+                feedback="Direct question-number match. The original document remains visible with the matched region highlighted.",
             )
             mappings.append(mapping)
             matched_answer_ids.add(best_match.id)
@@ -124,11 +130,18 @@ Return ONLY valid JSON."""
                         None
                     )
                     if matching_question and answer_id not in matched_answer_ids:
+                        matched_answer = next((a for a in unmatched_answers_for_matching if a.id == answer_id), None)
+                        answer_region = matched_answer.regions[0] if matched_answer and matched_answer.regions else None
                         mapping = QuestionAnswerMapping(
                             question_id=matching_question.id,
                             answer_id=answer_id,
                             confidence=0.6,  # Lower confidence for semantic
-                            match_type="semantic"
+                            match_type="semantic",
+                            question_region=matching_question.region,
+                            answer_region=answer_region,
+                            score=1,
+                            max_score=2,
+                            feedback="Semantic match. Review the highlighted handwritten answer on the original sheet.",
                         )
                         mappings.append(mapping)
                         matched_answer_ids.add(answer_id)
@@ -146,8 +159,22 @@ Return ONLY valid JSON."""
     unanswered_question_ids = []
     for question in questions:
         if question.id not in [m.question_id for m in mappings]:
+            mapping_question_region = question.region
             unanswered_question_ids.append(question.id)
-    
+            mappings.append(
+                QuestionAnswerMapping(
+                    question_id=question.id,
+                    answer_id=None,
+                    confidence=0.0,
+                    match_type="unanswered",
+                    question_region=mapping_question_region,
+                    answer_region=None,
+                    score=0,
+                    max_score=2,
+                    feedback="No answer was detected for this question.",
+                )
+            )
+
     return mappings, unmatched_answer_ids, unanswered_question_ids
 
 def _normalize_number(num_str: str) -> str:

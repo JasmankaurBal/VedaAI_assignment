@@ -23,6 +23,7 @@ export interface Question {
   number: string;
   order: number;
   text: string;
+  region?: AnswerRegion | null;
 }
 
 export interface QuestionPaper {
@@ -47,11 +48,17 @@ export interface QuestionAnswerMapping {
   answer_id: string | null;
   confidence: number | null;
   match_type: string;
+  question_region?: AnswerRegion | null;
+  answer_region?: AnswerRegion | null;
+  score?: number | null;
+  max_score?: number | null;
+  feedback?: string | null;
 }
 
 export interface StudentAnalysis {
   id: string;
   question_paper_id: string;
+  original_file_name: string;
   created_at: string;
   answers: ExtractedAnswer[];
   mappings: QuestionAnswerMapping[];

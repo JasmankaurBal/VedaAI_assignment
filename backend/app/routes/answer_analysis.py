@@ -3,6 +3,7 @@ Answer Analysis API endpoints
 """
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, status, Form
+from fastapi.responses import Response
 
 from ..models import (
     StudentAnalysis, AnswerAnalysisResponse,
@@ -69,6 +70,7 @@ async def analyze_answer_sheet(paper_id: str, file: UploadFile = File(...)):
         analysis = StudentAnalysis(
             id=analysis_id,
             question_paper_id=paper_id,
+            original_file_name=file.filename or "answer-sheet",
             answers=answers,
             mappings=mappings,
             unmatched_answers=unmatched_ids,
@@ -77,6 +79,12 @@ async def analyze_answer_sheet(paper_id: str, file: UploadFile = File(...)):
         
         # Store analysis
         storage.save_analysis(analysis)
+        storage.save_analysis_file(
+            analysis_id=analysis.id,
+            content=content,
+            filename=file.filename or "answer-sheet",
+            content_type=file.content_type or "application/octet-stream",
+        )
         
         return AnswerAnalysisResponse(
             analysis_id=analysis.id,
@@ -111,3 +119,22 @@ async def get_analysis(analysis_id: str):
             detail=f"Analysis '{analysis_id}' not found"
         )
     return analysis
+
+
+@router.get("/analyses/{analysis_id}/answer-sheet")
+async def get_answer_sheet_file(analysis_id: str):
+    """Get the original uploaded answer sheet file."""
+    stored_file = storage.get_analysis_file(analysis_id)
+    if not stored_file:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Answer sheet for analysis '{analysis_id}' not found"
+        )
+
+    return Response(
+        content=stored_file["content"],
+        media_type=stored_file["content_type"],
+        headers={
+            "Content-Disposition": f'inline; filename="{stored_file["filename"]}"'
+        },
+    )

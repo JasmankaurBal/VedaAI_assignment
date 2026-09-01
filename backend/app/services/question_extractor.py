@@ -46,13 +46,24 @@ IMPORTANT RULES:
    - The exact question number as printed
    - The question text
    - An order index (0-based, in reading order)
+   - The primary question region on the original page as a normalized bounding box
+     with page number
 
 Return a JSON array with this structure:
 [
   {
     "number": "1",
     "text": "Exact question text here",
-    "order": 0
+    "order": 0,
+    "region": {
+      "page": 1,
+      "bbox": {
+        "x": 0.05,
+        "y": 0.10,
+        "width": 0.90,
+        "height": 0.12
+      }
+    }
   },
   {
     "number": "2(a)",
@@ -116,11 +127,29 @@ ONLY return valid JSON, no other text."""
         # Convert to Question objects
         questions = []
         for idx, item in enumerate(extracted_data):
+            region = None
+            region_data = item.get("region")
+            if isinstance(region_data, dict):
+                bbox_data = region_data.get("bbox", {})
+                try:
+                    region = AnswerRegion(
+                        page=int(region_data.get("page", 1)),
+                        bbox=BoundingBox(
+                            x=float(bbox_data.get("x", 0)),
+                            y=float(bbox_data.get("y", 0)),
+                            width=float(bbox_data.get("width", 1)),
+                            height=float(bbox_data.get("height", 1)),
+                        ),
+                    )
+                except Exception:
+                    region = None
+
             question = Question(
                 id=f"q_{item.get('number', '').replace(' ', '').replace('(', '_').replace(')', '')}_{idx}",
                 number=item.get("number", f"Q{idx + 1}"),
                 text=item.get("text", ""),
-                order=item.get("order", idx)
+                order=item.get("order", idx),
+                region=region,
             )
             
             if question.text:  # Only add if has text

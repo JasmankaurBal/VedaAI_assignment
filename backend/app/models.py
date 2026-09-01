@@ -24,6 +24,10 @@ class Question(BaseModel):
     number: str = Field(..., description="Question number (e.g., '11(a)')")
     order: int = Field(..., ge=0, description="Display order")
     text: str = Field(..., description="Question text")
+    region: Optional[AnswerRegion] = Field(
+        None,
+        description="Primary region for the question on the original document",
+    )
 
 class QuestionPaper(BaseModel):
     """Saved question paper"""
@@ -48,11 +52,17 @@ class QuestionAnswerMapping(BaseModel):
     answer_id: Optional[str] = None  # None if unanswered
     confidence: Optional[float] = Field(None, ge=0, le=1)
     match_type: str = Field(default="direct")  # "direct" or "semantic"
+    question_region: Optional[AnswerRegion] = None
+    answer_region: Optional[AnswerRegion] = None
+    score: Optional[float] = Field(None, ge=0)
+    max_score: Optional[float] = Field(None, ge=0)
+    feedback: Optional[str] = None
 
 class StudentAnalysis(BaseModel):
     """Analysis result for a student's answer sheet"""
     id: str = Field(..., description="Unique analysis ID")
     question_paper_id: str = Field(..., description="Reference to saved question paper")
+    original_file_name: str = Field(..., description="Original upload filename for the answer sheet")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     answers: List[ExtractedAnswer] = Field(default_factory=list)
     mappings: List[QuestionAnswerMapping] = Field(default_factory=list)

@@ -3,6 +3,7 @@ Question Papers API endpoints
 """
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, status, Form
+from fastapi.responses import Response
 
 from ..models import (
     QuestionPaper, Question, QuestionPaperResponse,
@@ -72,6 +73,12 @@ async def upload_question_paper(
         
         # Store in memory
         storage.save_question_paper(paper)
+        storage.save_question_paper_file(
+            paper_id=paper.id,
+            content=content,
+            filename=file.filename or "question-paper",
+            content_type=file.content_type or "application/octet-stream",
+        )
         
         return QuestionPaperResponse(
             id=paper.id,
@@ -119,8 +126,26 @@ async def get_question_paper(paper_id: str):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Question paper '{paper_id}' not found. It may have been cleared if the backend was restarted."
-        )
+    )
     return paper
+
+@router.get("/question-papers/{paper_id}/file")
+async def get_question_paper_file(paper_id: str):
+    """Get the original uploaded question paper file."""
+    stored_file = storage.get_question_paper_file(paper_id)
+    if not stored_file:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Question paper '{paper_id}' file not found"
+        )
+
+    return Response(
+        content=stored_file["content"],
+        media_type=stored_file["content_type"],
+        headers={
+            "Content-Disposition": f'inline; filename="{stored_file["filename"]}"'
+        },
+    )
 
 @router.delete("/question-papers/{paper_id}")
 async def delete_question_paper(paper_id: str):

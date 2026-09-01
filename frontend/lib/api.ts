@@ -118,3 +118,11 @@ export async function getAnalysis(analysisId: string): Promise<StudentAnalysis> 
 
   return response.json();
 }
+
+export function getQuestionPaperFileUrl(paperId: string): string {
+  return `${API_URL}/question-papers/${paperId}/file`;
+}
+
+export function getAnswerSheetUrl(analysisId: string): string {
+  return `${API_URL}/analyses/${analysisId}/answer-sheet`;
+}
